@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: business-contacts-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app-server:
+    build: ./server
+    image: app-server
+    container_name: business-contacts-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: ${PORT}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app-client:
+    build: ./client
+    image: app-client
+    container_name: business-contacts-client
+    restart: unless-stopped
+    ports:
+      - "1234:1234"
+    depends_on:
+      - app-server
+
+volumes:
+  postgres_data:
+    driver: local
