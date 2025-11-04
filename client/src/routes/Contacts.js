@@ -1,9 +1,9 @@
 import React from 'react';
 import { useLoaderData } from 'react-router-dom';
+import api from '../services/api';
 
 export async function loader() {
-  const response = await fetch('http://localhost:3000/contacts');
-  const data = await response.json();  
+  const data = await api.getContacts();
   return data;
 }
 

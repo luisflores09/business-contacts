@@ -97,3 +97,70 @@ Once you have created the `docker-compose.yml`:
 - run `docker-compose up`
 - Visit the app at [localhost:1234](https://localhost:1234)
 - To stop the app: `docker-compose down --rmi all` (this also removes all images)
+
+## 🚀 Deployment to Render
+
+### Prerequisites
+1. Push your code to GitHub
+2. Create a [Render account](https://render.com)
+
+### Step 1: Deploy PostgreSQL Database
+
+1. Go to [Render Dashboard](https://dashboard.render.com/)
+2. Click **"New +"** → **"PostgreSQL"**
+3. Configure:
+   - Name: `business-contacts-db`
+   - Database: `business_contacts`
+   - Region: Choose closest to you
+4. Click **"Create Database"**
+5. **Copy the Internal Database URL** (you'll need this for the server)
+
+### Step 2: Deploy Backend Server
+
+1. Click **"New +"** → **"Web Service"**
+2. Connect your GitHub repository
+3. Configure:
+   - **Name**: `business-contacts-server`
+   - **Root Directory**: `server`
+   - **Runtime**: `Docker`
+4. Add **Environment Variables**:
+   ```
+   NODE_ENV=production
+   PORT=3000
+   DATABASE_URL=<paste-internal-database-url>
+   CLIENT_URL=<your-frontend-url-from-step-3>
+   ```
+5. Set **Health Check Path**: `/health`
+6. Click **"Create Web Service"**
+7. **Copy the server URL** (e.g., `https://business-contacts-server.onrender.com`)
+
+### Step 3: Deploy Frontend Client
+
+1. Click **"New +"** → **"Web Service"**
+2. Connect your GitHub repository
+3. Configure:
+   - **Name**: `business-contacts-client`
+   - **Root Directory**: `client`
+   - **Runtime**: `Docker`
+4. Add **Environment Variables**:
+   ```
+   REACT_APP_API_URL=<server-url-from-step-2>
+   ```
+5. Click **"Create Web Service"**
+
+### Step 4: Update Server Environment
+
+Go back to your server settings and update `CLIENT_URL` with your actual client URL from Step 3.
+
+### Testing Your Deployment
+
+- Health check: `https://your-server.onrender.com/health`
+- API: `https://your-server.onrender.com/contacts`
+- Frontend: `https://your-client.onrender.com`
+
+### Important Notes
+
+- **Free tier**: Services spin down after 15 minutes of inactivity
+- **First request**: May take 30-60 seconds to wake up
+- **Database**: Free tier expires after 90 days
+- **CORS**: Configured to accept requests from your client URL

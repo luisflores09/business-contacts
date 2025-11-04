@@ -4,7 +4,14 @@ const morgan = require('morgan');
 const cors = require('cors');
 const pool = require('./config/database');
 
-app.use(cors());
+// Configure CORS for production
+const corsOptions = {
+  origin: process.env.CLIENT_URL || '*',
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
