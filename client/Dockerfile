@@ -14,7 +14,11 @@ RUN npm install
 # Copy application code
 COPY . .
 
-# Build the application
+# Accept build argument for API URL
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
+# Build the application with environment variable
 RUN npm run build
 
 # Install a simple HTTP server
