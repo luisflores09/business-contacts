@@ -5,11 +5,15 @@ const cors = require('cors');
 const pool = require('./config/database');
 
 // Configure CORS for production
+// Remove trailing slash from CLIENT_URL to avoid CORS issues
+const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : '*';
 const corsOptions = {
-  origin: process.env.CLIENT_URL || '*',
+  origin: clientUrl,
   credentials: true,
   optionsSuccessStatus: 200
 };
+
+console.log('CORS configured for origin:', clientUrl);
 
 app.use(cors(corsOptions));
 app.use(morgan('dev'));
