@@ -76,14 +76,29 @@ app.post('/init-db', async (req, res) => {
 
 // Get all contacts
 app.get('/contacts', async (req, res, next) => {
+  console.log('📞 GET /contacts - Starting to fetch contacts...');
   try {
+    console.log('🔍 Executing query to fetch contacts from database...');
     const result = await pool.query(
       'SELECT id, name, email, phone, department, position, created_at FROM contacts ORDER BY name ASC'
     );
+    console.log(`✅ Query successful! Found ${result.rows.length} contacts`);
+    console.log('📊 Contacts data:', JSON.stringify(result.rows, null, 2));
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching contacts:', error);
-    res.status(500).json({ error: 'Failed to fetch contacts' });
+    console.error('❌ Error fetching contacts:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      detail: error.detail,
+      table: error.table,
+      column: error.column
+    });
+    res.status(500).json({ 
+      error: 'Failed to fetch contacts',
+      details: error.message,
+      code: error.code
+    });
   }
 });
 
@@ -123,10 +138,10 @@ app.post('/contacts', async (req, res, next) => {
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
+    console.error('Error creating contact:', error);
     if (error.code === '23505') { // Unique violation
       return res.status(409).json({ error: 'Email already exists' });
     }
-    console.error('Error creating contact:', error);
     res.status(500).json({ error: 'Failed to create contact' });
   }
 });
